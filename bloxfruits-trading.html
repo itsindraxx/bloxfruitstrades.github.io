@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FruitTrade — Blox Fruits Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-void:#080b14; --bg-deep:#0d1220; --bg-card:#111827;
+  --bg-card-hover:#151f30; --bg-input:#0a0f1c;
+  --border:rgba(99,179,237,0.15); --border-bright:rgba(99,179,237,0.35);
+  --accent:#38bdf8; --accent2:#f472b6; --accent3:#a78bfa;
+  --gold:#fbbf24; --win:#34d399; --fair:#60a5fa; --loss:#f87171;
+  --text:#e2e8f0; --text-muted:#64748b; --text-dim:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg-void);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 50% 70%,rgba(255,255,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.15) 0%,transparent 100%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(8,11,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:1.5rem;height:60px}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:var(--accent);text-shadow:0 0 15px rgba(56,189,248,.6);letter-spacing:2px;text-decoration:none;white-space:nowrap}
+.nav-logo span{color:var(--accent2)}
+.nav-links{display:flex;gap:.25rem;flex:1;list-style:none}
+.nav-links a{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.85rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;padding:.4rem .9rem;border-radius:6px;transition:all .2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--accent);background:rgba(56,189,248,.08)}
+.nav-right{display:flex;align-items:center;gap:.75rem;margin-left:auto}
+.gem-badge{display:flex;align-items:center;gap:6px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:20px;padding:4px 12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;color:var(--gold)}
+.btn-nav{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:8px;cursor:pointer;border:none;transition:all .2s}
+.btn-login{background:transparent;border:1px solid var(--border-bright);color:var(--accent)}
+.btn-register{background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:#fff;box-shadow:0 0 15px rgba(56,189,248,.25)}
+.btn-register:hover{box-shadow:0 0 25px rgba(56,189,248,.45);transform:translateY(-1px)}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(56,189,248,.08);border:1px solid var(--border-bright);border-radius:20px;padding:5px 14px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.82rem;color:var(--accent);cursor:pointer}
+.user-chip .av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:2.5rem 2rem 1.5rem;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(56,189,248,.06) 0%,transparent 70%)}
+.hero h1{font-family:'Orbitron',sans-serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:900;background:linear-gradient(135deg,#38bdf8,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text-dim);font-size:.9rem;margin-bottom:1.5rem}
+
+/* SEARCH */
+.search-section{position:relative;z-index:1;max-width:780px;margin:0 auto 2rem;padding:0 2rem}
+.search-bar{display:flex;gap:.75rem;align-items:center;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:12px;padding:.5rem .75rem;box-shadow:0 0 20px rgba(56,189,248,.3)}
+.search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.4rem .5rem}
+.search-bar input::placeholder{color:var(--text-muted)}
+.search-btn{background:linear-gradient(135deg,#0ea5e9,#8b5cf6);border:none;border-radius:8px;color:#fff;padding:8px 18px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+
+/* FILTERS */
+.filters{position:relative;z-index:1;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;padding:0 2rem;margin-bottom:2rem}
+.filter-chip{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.5px;text-transform:uppercase;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);cursor:pointer;transition:all .2s}
+.filter-chip:hover{border-color:var(--accent);color:var(--accent)}
+.filter-chip.active{background:rgba(56,189,248,.12);border-color:var(--accent);color:var(--accent)}
+
+/* SORT ROW */
+.sort-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 1.5rem;padding:0 2rem}
+.sort-row .label{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.8rem;letter-spacing:.5px;color:var(--text-dim);text-transform:uppercase}
+.sort-row .label span{color:var(--accent)}
+.sort-select{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);border-radius:8px;padding:6px 12px;font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;outline:none}
+
+/* STATS BAR */
+.stats-bar{position:relative;z-index:1;background:var(--bg-deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;margin-bottom:2rem}
+.stat-item{text-align:center}
+.stat-value{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.2rem;color:var(--accent);display:block}
+.stat-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-family:'Rajdhani',sans-serif;font-weight:600}
+
+/* EMPTY STATE */
+.empty-state{position:relative;z-index:1;text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+.empty-state .icon{font-size:3rem;margin-bottom:1rem;opacity:.5}
+.empty-state h3{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--text-dim);margin-bottom:.5rem}
+.empty-state p{font-size:.85rem;line-height:1.6}
+
+/* TRADES GRID */
+.trades-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;padding:0 2rem 4rem}
+
+/* TRADE CARD */
+.trade-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;transition:all .25s;position:relative;overflow:hidden}
+.trade-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .25s}
+.trade-card:hover{border-color:var(--border-bright);background:var(--bg-card-hover);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 20px rgba(56,189,248,.1)}
+.trade-card:hover::before{opacity:1}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.player-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.75rem;border:2px solid;flex-shrink:0;overflow:hidden}
+.player-avatar img{width:100%;height:100%;object-fit:cover}
+.player-info{flex:1;min-width:0}
+.player-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-meta{font-size:.7rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.roblox-tag{color:var(--gold);font-size:.68rem}
+.star-rating{display:flex;align-items:center;gap:4px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;color:var(--gold)}
+.section-label{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem}
+.fruits-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.9rem;min-height:46px;align-items:flex-start}
+.fruit-icon{width:42px;height:42px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:transform .15s;position:relative;overflow:visible}
+.fruit-icon:hover{transform:scale(1.1)}
+.fruit-icon img{width:36px;height:36px;object-fit:contain;border-radius:6px}
+.fruit-icon .qty-badge{position:absolute;bottom:-5px;right:-5px;background:var(--accent2);color:#fff;font-size:.55rem;font-weight:700;border-radius:4px;padding:1px 5px;font-family:'Rajdhani',sans-serif;z-index:2}
+.fruit-icon .tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid var(--border-bright);border-radius:6px;padding:3px 8px;white-space:nowrap;font-size:.65rem;color:var(--text);pointer-events:none;opacity:0;transition:opacity .15s;z-index:99}
+.fruit-icon:hover .tip{opacity:1}
+.divider{border:none;border-top:1px solid var(--border);margin:.75rem 0}
+.ratings-row{display:flex;gap:6px;margin-bottom:.9rem}
+.rating-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.5px}
+.badge-w{background:rgba(52,211,153,.12);color:var(--win);border:1px solid rgba(52,211,153,.25)}
+.badge-f{background:rgba(96,165,250,.12);color:var(--fair);border:1px solid rgba(96,165,250,.25)}
+.badge-l{background:rgba(248,113,113,.12);color:var(--loss);border:1px solid rgba(248,113,113,.25)}
+.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-calc,.btn-inspect,.btn-delete{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;padding:8px;border-radius:8px;cursor:pointer;border:none;transition:all .2s}
+.btn-calc{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+.btn-calc:hover{border-color:var(--accent);color:var(--accent)}
+.btn-inspect{background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(139,92,246,.15));border:1px solid rgba(56,189,248,.3);color:var(--accent)}
+.btn-inspect:hover{background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(139,92,246,.25))}
+.btn-delete{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--loss)}
+.btn-delete:hover{background:rgba(248,113,113,.2)}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--win);box-shadow:0 0 6px var(--win);flex-shrink:0}
+.hot-badge{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#f472b6,#fb923c);color:#fff;font-size:.6rem;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+.own-badge{position:absolute;top:12px;right:12px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:var(--accent);font-size:.6rem;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--win);animation:pulse 1.5s infinite;display:inline-block;margin-right:5px;vertical-align:middle}
+.live-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:var(--win)}
+
+/* POST TRADE BTN */
+.post-btn-wrap{position:relative;z-index:1;text-align:center;margin-bottom:1.5rem}
+.btn-post-trade{background:linear-gradient(135deg,#0ea5e9,#8b5cf6);border:none;border-radius:12px;color:#fff;padding:12px 28px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(56,189,248,.3);transition:all .2s}
+.btn-post-trade:hover{box-shadow:0 0 35px rgba(56,189,248,.5);transform:translateY(-2px)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:2rem;box-shadow:0 25px 60px rgba(0,0,0,.6);transform:scale(.9) translateY(20px);transition:transform .3s;position:relative}
+.modal-overlay.show .modal{transform:scale(1) translateY(0)}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#38bdf8,#a78bfa,#f472b6)}
+.modal-wide{max-width:580px}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:var(--text);margin-bottom:.25rem;text-align:center}
+.modal-sub{font-size:.82rem;color:var(--text-muted);text-align:center;margin-bottom:1.5rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* STEPS */
+.steps{display:flex;gap:0;margin-bottom:1.5rem}
+.step{flex:1;text-align:center;position:relative}
+.step::after{content:'';position:absolute;top:15px;left:50%;width:100%;height:1px;background:var(--border)}
+.step:last-child::after{display:none}
+.step-circle{width:30px;height:30px;border-radius:50%;background:var(--bg-input);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;color:var(--text-muted);margin:0 auto 6px;position:relative;z-index:1;transition:all .3s}
+.step.active .step-circle{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(56,189,248,.3)}
+.step.done .step-circle{background:var(--win);border-color:var(--win);color:#fff}
+.step-label{font-family:'Rajdhani',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}
+.step.active .step-label{color:var(--accent)}
+
+/* FORM */
+.form-group{margin-bottom:1rem}
+.form-label{font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px}
+.form-input{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.1)}
+
+/* ROBLOX BOX */
+.roblox-box{background:var(--bg-input);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.roblox-box-header{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
+.roblox-box-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;color:var(--gold)}
+.roblox-box p{font-size:.78rem;color:var(--text-muted);line-height:1.5}
+.btn-roblox{width:100%;margin-top:.75rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:10px;color:var(--gold);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-roblox:hover{background:rgba(251,191,36,.18);box-shadow:0 0 15px rgba(251,191,36,.2)}
+.btn-roblox.verified{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:var(--win)}
+.btn-primary{width:100%;background:linear-gradient(135deg,#0ea5e9,#8b5cf6);border:none;border-radius:10px;padding:12px;color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 0 20px rgba(56,189,248,.25);margin-top:.5rem}
+.btn-primary:hover{box-shadow:0 0 30px rgba(56,189,248,.4);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.toggle-auth{text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted)}
+.toggle-auth a{color:var(--accent);text-decoration:none;font-weight:500;cursor:pointer}
+
+/* FRUIT PICKER */
+.fruit-picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin-top:.5rem;max-height:240px;overflow-y:auto;padding:4px}
+.fruit-pick-item{background:var(--bg-input);border:2px solid var(--border);border-radius:10px;padding:8px 4px;cursor:pointer;text-align:center;transition:all .2s;position:relative}
+.fruit-pick-item:hover{border-color:var(--border-bright)}
+.fruit-pick-item.selected{border-color:var(--accent);background:rgba(56,189,248,.1)}
+.fruit-pick-item img{width:40px;height:40px;object-fit:contain;display:block;margin:0 auto 4px}
+.fruit-pick-item .fname{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.65rem;color:var(--text-dim);line-height:1.2}
+.fruit-pick-item.selected .fname{color:var(--accent)}
+.fruit-pick-item .sel-check{position:absolute;top:3px;right:3px;width:14px;height:14px;background:var(--accent);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:.5rem;color:#fff}
+.fruit-pick-item.selected .sel-check{display:flex}
+.selected-preview{display:flex;gap:6px;flex-wrap:wrap;min-height:46px;margin-top:.5rem;padding:6px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border)}
+.selected-preview img{width:36px;height:36px;object-fit:contain;border-radius:6px;cursor:pointer;transition:transform .15s}
+.selected-preview img:hover{transform:scale(1.1);filter:brightness(.7)}
+.section-sep{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin:.75rem 0 .5rem;display:flex;align-items:center;gap:.5rem}
+.section-sep::before,.section-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* INSPECT */
+.inspect-card-header{display:flex;align-items:center;gap:14px;margin-bottom:1.5rem}
+.inspect-avatar{width:56px;height:56px;border-radius:12px;background:var(--bg-input);border:2px solid var(--border-bright);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.inspect-username{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;color:var(--text)}
+.inspect-fruits{display:flex;gap:8px;flex-wrap:wrap;margin-top:.5rem}
+.inspect-fruit{background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text)}
+.inspect-fruit img{width:30px;height:30px;object-fit:contain;border-radius:6px}
+.fruit-name{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.8rem}
+.fruit-tier{font-size:.65rem;color:var(--text-muted)}
+.tier-s{color:#f472b6}.tier-a{color:#a78bfa}.tier-b{color:#60a5fa}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:9999;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:12px;padding:.75rem 1.25rem;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.85rem;color:var(--text);box-shadow:0 8px 30px rgba(0,0,0,.4);transform:translateY(20px) scale(.95);opacity:0;transition:all .3s;display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateY(0) scale(1);opacity:1}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg-void)}
+::-webkit-scrollbar-thumb{background:rgba(56,189,248,.3);border-radius:3px}
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2rem;text-align:center;color:var(--text-muted);font-size:.78rem}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:600px){.nav-links{display:none}.hero h1{font-size:1.5rem}.trades-grid{grid-template-columns:1fr}.stats-bar{gap:1.5rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">FRUIT<span>TRADE</span></a>
+  <ul class="nav-links">
+    <li><a class="active">Trading</a></li>
+    <li><a>Valores</a></li>
+    <li><a>Frutas</a></li>
+    <li><a>Giveaways</a></li>
+  </ul>
+  <div class="nav-right" id="navRight">
+    <button class="btn-nav btn-login" onclick="openModal('login')">Iniciar Sesión</button>
+    <button class="btn-nav btn-register" onclick="openModal('register')">Registrarse</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>El Mejor Mercado de<br>Blox Fruits Trading</h1>
+  <p>Jugadores reales publicando sus trades. Conecta, intercambia y consigue las mejores frutas.</p>
+</div>
+
+<div class="search-section">
+  <div class="search-bar">
+    <span style="color:var(--text-muted);font-size:1.1rem">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar por fruta o jugador de Roblox..." oninput="renderAll()">
+    <button class="search-btn" onclick="renderAll()">Buscar</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><span class="stat-value" id="statTrades">0</span><span class="stat-label">Trades Activos</span></div>
+  <div class="stat-item"><span class="stat-value" id="statUsers">0</span><span class="stat-label">Jugadores Registrados</span></div>
+  <div class="stat-item"><span class="stat-value">24/7</span><span class="stat-label">Disponible</span></div>
+</div>
+
+<div class="filters">
+  <button class="filter-chip active" onclick="setFilter(this,'all')">✦ Todos</button>
+  <button class="filter-chip" onclick="setFilter(this,'s')">💎 Tier S</button>
+  <button class="filter-chip" onclick="setFilter(this,'a')">⚡ Tier A</button>
+  <button class="filter-chip" onclick="setFilter(this,'b')">🌀 Tier B</button>
+</div>
+
+<div class="sort-row">
+  <div class="label"><span class="live-dot"></span><span class="live-label">En vivo</span> &nbsp;·&nbsp; <span id="tradeCount">0</span> trades</div>
+  <select class="sort-select" onchange="renderAll()">
+    <option value="recent">Más Recientes</option>
+    <option value="value">Mayor Valor</option>
+  </select>
+</div>
+
+<div class="post-btn-wrap" id="postBtnWrap" style="display:none">
+  <button class="btn-post-trade" onclick="openModal('post')">+ Publicar mi Trade</button>
+</div>
+
+<div class="trades-grid" id="tradesGrid"></div>
+
+<footer>
+  <p>FruitTrade © 2025 &nbsp;·&nbsp; No afiliado con Roblox Corporation ni Gamer Robot Inc.</p>
+  <p style="margin-top:6px"><a>Términos</a> &nbsp;·&nbsp; <a>Privacidad</a> &nbsp;·&nbsp; <a>Discord</a></p>
+</footer>
+
+<!-- AUTH / POST MODAL -->
+<div class="modal-overlay" id="mainModal" onclick="bgClose(event,'mainModal')">
+  <div class="modal" id="mainModalBox">
+    <button class="modal-close" onclick="closeModal('mainModal')">✕</button>
+    <div id="mainModalContent"></div>
+  </div>
+</div>
+
+<!-- INSPECT MODAL -->
+<div class="modal-overlay" id="inspectModal" onclick="bgClose(event,'inspectModal')">
+  <div class="modal modal-wide" id="inspectModalBox">
+    <button class="modal-close" onclick="closeModal('inspectModal')">✕</button>
+    <div id="inspectContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = 'https://bloxodes.com/Blox%20Fruits/Fruits/';
+const ALL_FRUITS = [
+  {id:'dragon',  img:BASE+'dragon.webp',  name:'Dragon',  tier:'S', value:35000},
+  {id:'kitsune', img:BASE+'kitsune.webp', name:'Kitsune', tier:'S', value:28000},
+  {id:'control', img:BASE+'control.webp', name:'Control', tier:'S', value:22000},
+  {id:'dough',   img:BASE+'dough.webp',   name:'Dough',   tier:'S', value:10000},
+  {id:'venom',   img:BASE+'venom.webp',   name:'Venom',   tier:'S', value:8500 },
+  {id:'spirit',  img:BASE+'spirit.webp',  name:'Spirit',  tier:'S', value:7500 },
+  {id:'shadow',  img:BASE+'shadow.webp',  name:'Shadow',  tier:'A', value:4000 },
+  {id:'gravity', img:BASE+'gravity.webp', name:'Gravity', tier:'A', value:3800 },
+  {id:'pain',    img:BASE+'pain.webp',    name:'Pain',    tier:'A', value:2800 },
+  {id:'portal',  img:BASE+'portal.webp',  name:'Portal',  tier:'A', value:2200 },
+  {id:'phoenix', img:BASE+'phoenix.webp', name:'Phoenix', tier:'A', value:1800 },
+  {id:'buddha',  img:BASE+'buddha.webp',  name:'Buddha',  tier:'A', value:1200 },
+  {id:'sound',   img:BASE+'sound.webp',   name:'Sound',   tier:'B', value:1100 },
+  {id:'blizzard',img:BASE+'blizzard.webp',name:'Blizzard',tier:'B', value:900  },
+  {id:'spider',  img:BASE+'spider.webp',  name:'Spider',  tier:'B', value:850  },
+  {id:'quake',   img:BASE+'quake.webp',   name:'Quake',   tier:'B', value:700  },
+  {id:'magma',   img:BASE+'magma.webp',   name:'Magma',   tier:'B', value:600  },
+  {id:'light',   img:BASE+'light.webp',   name:'Light',   tier:'B', value:500  },
+  {id:'ice',     img:BASE+'ice.webp',     name:'Ice',     tier:'B', value:400  },
+  {id:'flame',   img:BASE+'flame.webp',   name:'Flame',   tier:'B', value:350  },
+];
+
+const COLORS = ['#38bdf8','#f472b6','#a78bfa','#34d399','#fbbf24','#fb923c','#e879f9','#2dd4bf'];
+
+/* ── STORAGE ── */
+function getUsers()  { try{return JSON.parse(localStorage.getItem('ft_users')||'[]')}catch{return[]}}
+function getTrades() { try{return JSON.parse(localStorage.getItem('ft_trades')||'[]')}catch{return[]}}
+function saveUsers(u)  { localStorage.setItem('ft_users',JSON.stringify(u)) }
+function saveTrades(t) { localStorage.setItem('ft_trades',JSON.stringify(t)) }
+function getSession() { try{return JSON.parse(sessionStorage.getItem('ft_session'))}catch{return null}}
+function setSession(u) { sessionStorage.setItem('ft_session',JSON.stringify(u)) }
+function clearSession(){ sessionStorage.removeItem('ft_session') }
+
+/* ── HELPERS ── */
+function fruitById(id){ return ALL_FRUITS.find(f=>f.id===id)||null }
+function colorFor(name){ const c=COLORS;let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))%c.length;return c[h] }
+function timeAgo(ts){
+  const d=Date.now()-ts,s=Math.floor(d/1000);
+  if(s<60) return s+'s';
+  if(s<3600) return Math.floor(s/60)+'m';
+  if(s<86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
+}
+
+/* ── NAV ── */
+function updateNav(){
+  const u=getSession();
+  const nr=document.getElementById('navRight');
+  const pb=document.getElementById('postBtnWrap');
+  if(u){
+    const col=colorFor(u.username);
+    nr.innerHTML=`
+      <div class="user-chip" onclick="openUserMenu()">
+        <div class="av" style="background:${col}22;color:${col};border:1px solid ${col}44">${u.username[0].toUpperCase()}</div>
+        ${u.username}
+        <span style="color:var(--text-muted);font-size:.7rem">▾</span>
+      </div>`;
+    pb.style.display='block';
+  } else {
+    nr.innerHTML=`
+      <button class="btn-nav btn-login" onclick="openModal('login')">Iniciar Sesión</button>
+      <button class="btn-nav btn-register" onclick="openModal('register')">Registrarse</button>`;
+    pb.style.display='none';
+  }
+}
+
+function openUserMenu(){
+  const u=getSession();
+  if(!u) return;
+  const myTrades=getTrades().filter(t=>t.userId===u.id);
+  document.getElementById('mainModalContent').innerHTML=`
+    <div class="modal-title" style="margin-bottom:.25rem">${u.username}</div>
+    <div class="modal-sub">🎮 ${u.roblox} · Cuenta verificada</div>
+    <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:1rem;text-align:center">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--text-muted);margin-bottom:.5rem">MIS ESTADÍSTICAS</div>
+      <div style="display:flex;justify-content:center;gap:2rem">
+        <div><div class="stat-value" style="font-size:1.1rem">${myTrades.length}</div><div class="stat-label">Trades</div></div>
+        <div><div class="stat-value" style="font-size:1.1rem;color:var(--win)">${u.w||0}</div><div class="stat-label">Ganados</div></div>
+        <div><div class="stat-value" style="font-size:1.1rem;color:var(--loss)">${u.l||0}</div><div class="stat-label">Perdidos</div></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="openModal('post');closeModal('mainModal')">+ Publicar Trade</button>
+    <button onclick="logout()" style="width:100%;margin-top:.5rem;background:transparent;border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:11px;color:var(--loss);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Cerrar Sesión</button>`;
+  document.getElementById('mainModal').classList.add('show');
+}
+
+function logout(){
+  clearSession();
+  updateNav();
+  renderAll();
+  closeModal('mainModal');
+  showToast('👋 Sesión cerrada');
+}
+
+/* ── MODALS ── */
+let regStep=1, robloxOk=false, selOffers=[], selRequests=[];
+
+function openModal(type){
+  const box=document.getElementById('mainModalBox');
+  box.className='modal'+(type==='post'?' modal-wide':'');
+  if(type==='register'){ regStep=1; robloxOk=false; renderRegister(); }
+  else if(type==='login'){ renderLogin(); }
+  else if(type==='post'){ selOffers=[]; selRequests=[]; renderPostTrade(); }
+  document.getElementById('mainModal').classList.add('show');
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('show') }
+function bgClose(e,id){ if(e.target.id===id) closeModal(id) }
+
+/* LOGIN */
+function renderLogin(){
+  document.getElementById('mainModalContent').innerHTML=`
+    <div class="modal-title">Bienvenido de vuelta</div>
+    <div class="modal-sub">Inicia sesión con tu cuenta FruitTrade</div>
+    <div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="li-user" placeholder="tu_usuario"></div>
+    <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" type="password" id="li-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-primary" onclick="doLogin()">Iniciar Sesión</button>
+    <div class="toggle-auth">¿No tienes cuenta? <a onclick="openModal('register')">Regístrate</a></div>`;
+}
+
+function doLogin(){
+  const u=document.getElementById('li-user').value.trim();
+  const p=document.getElementById('li-pass').value;
+  if(!u||!p){ showToast('⚠️ Completa todos los campos'); return }
+  const users=getUsers();
+  const found=users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.password===p);
+  if(!found){ showToast('❌ Usuario o contraseña incorrectos'); return }
+  setSession(found);
+  closeModal('mainModal');
+  updateNav(); renderAll();
+  showToast('✅ Bienvenido, '+found.username+'!');
+}
+
+/* REGISTER */
+function renderRegister(){
+  document.getElementById('mainModalContent').innerHTML=`
+    <div class="modal-title">Crear Cuenta</div>
+    <div class="modal-sub">Únete para publicar y gestionar tus trades</div>
+    <div class="steps">
+      <div class="step ${regStep>=1?'active':''} ${regStep>1?'done':''}"><div class="step-circle">${regStep>1?'✓':'01'}</div><div class="step-label">Cuenta</div></div>
+      <div class="step ${regStep>=2?'active':''} ${regStep>2?'done':''}"><div class="step-circle">${regStep>2?'✓':'02'}</div><div class="step-label">Roblox</div></div>
+      <div class="step ${regStep>=3?'active':''}"><div class="step-circle">03</div><div class="step-label">Listo</div></div>
+    </div>
+    ${regStep===1?renderRegStep1():regStep===2?renderRegStep2():renderRegStep3()}
+    ${regStep<3?'<div class="toggle-auth">¿Ya tienes cuenta? <a onclick="openModal(\'login\')">Inicia Sesión</a></div>':''}`;
+}
+
+function renderRegStep1(){ return `
+  <div class="form-group"><label class="form-label">Nombre de usuario</label><input class="form-input" id="r-user" placeholder="tu_usuario"></div>
+  <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="r-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
+  <button class="btn-primary" onclick="goRegStep2()">Continuar →</button>`; }
+
+function renderRegStep2(){ return `
+  <div class="roblox-box">
+    <div class="roblox-box-header"><div style="width:28px;height:28px;border-radius:6px;background:rgba(251,191,36,.15);display:flex;align-items:center;justify-content:center;font-size:.9rem">🎮</div>
+    <div class="roblox-box-title">Verificación de Roblox</div></div>
+    <p>Autoriza nuestro bot para que tus trades muestren tu avatar y usuario real de Roblox.</p>
+    <button class="btn-roblox ${robloxOk?'verified':''}" onclick="doRobloxAuth()">
+      ${robloxOk?'✅ Bot Autorizado':'🎮 Autorizar Bot en Roblox'}</button>
+  </div>
+  <div class="form-group"><label class="form-label">Usuario de Roblox</label>
+    <input class="form-input" id="r-roblox" placeholder="TuNombreEnRoblox" ${robloxOk?'':'disabled'}></div>
+  <button class="btn-primary" onclick="goRegStep3()" ${robloxOk?'':'disabled'}>Vincular y Crear Cuenta →</button>
+  <div style="text-align:center;margin-top:.5rem"><a onclick="regStep=1;renderRegister()" style="font-size:.75rem;color:var(--text-muted);cursor:pointer">← Volver</a></div>`; }
+
+function renderRegStep3(){ return `
+  <div style="text-align:center;padding:1rem 0">
+    <div style="font-size:3rem;margin-bottom:1rem">🎉</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--win);margin-bottom:.5rem">¡Cuenta creada!</div>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6">Tu cuenta está verificada con Roblox. Ya puedes publicar trades.</p>
+    <button class="btn-primary" onclick="finishRegister()">Empezar a Tradear 🚀</button>
+  </div>`; }
+
+let pendingReg={};
+function goRegStep2(){
+  const u=document.getElementById('r-user').value.trim();
+  const p=document.getElementById('r-pass').value;
+  if(!u||u.length<3){ showToast('⚠️ Usuario: mínimo 3 caracteres'); return }
+  if(!p||p.length<6){ showToast('⚠️ Contraseña: mínimo 6 caracteres'); return }
+  const users=getUsers();
+  if(users.find(x=>x.username.toLowerCase()===u.toLowerCase())){ showToast('❌ Ese usuario ya existe'); return }
+  pendingReg={username:u, password:p};
+  regStep=2; renderRegister();
+}
+
+function doRobloxAuth(){
+  const btn=document.querySelector('.btn-roblox');
+  if(btn){ btn.textContent='⏳ Conectando con Roblox...'; btn.disabled=true }
+  setTimeout(()=>{ robloxOk=true; showToast('✅ Bot de Roblox autorizado'); renderRegister() }, 1800);
+}
+
+function goRegStep3(){
+  if(!robloxOk) return;
+  const rb=document.getElementById('r-roblox').value.trim();
+  if(!rb){ showToast('⚠️ Ingresa tu usuario de Roblox'); return }
+  pendingReg.roblox=rb;
+  pendingReg.id='u_'+Date.now();
+  pendingReg.color=colorFor(pendingReg.username);
+  pendingReg.w=0; pendingReg.f=0; pendingReg.l=0;
+  pendingReg.joined=Date.now();
+  const users=getUsers(); users.push(pendingReg); saveUsers(users);
+  setSession(pendingReg);
+  regStep=3; renderRegister();
+}
+
+function finishRegister(){
+  closeModal('mainModal'); updateNav(); renderAll();
+  showToast('🎉 ¡Bienvenido a FruitTrade, '+pendingReg.username+'!');
+}
+
+/* POST TRADE */
+function renderPostTrade(){
+  document.getElementById('mainModalContent').innerHTML=`
+    <div class="modal-title">Publicar Trade</div>
+    <div class="modal-sub">Selecciona qué ofreces y qué pides</div>
+    <div class="section-sep">🟢 Yo ofrezco</div>
+    <div class="form-label" style="margin-bottom:4px">Selecciona tus frutas (máx. 4)</div>
+    <div class="fruit-picker-grid" id="offerPicker"></div>
+    <div class="form-label" style="margin:.6rem 0 4px">Seleccionadas:</div>
+    <div class="selected-preview" id="offerPreview"><span style="font-size:.75rem;color:var(--text-muted);align-self:center;padding:4px">Ninguna</span></div>
+    <div class="section-sep" style="margin-top:1rem">🔴 Yo pido</div>
+    <div class="form-label" style="margin-bottom:4px">¿Qué quieres a cambio? (máx. 4)</div>
+    <div class="fruit-picker-grid" id="requestPicker"></div>
+    <div class="form-label" style="margin:.6rem 0 4px">Seleccionadas:</div>
+    <div class="selected-preview" id="requestPreview"><span style="font-size:.75rem;color:var(--text-muted);align-self:center;padding:4px">Ninguna</span></div>
+    <div class="form-group" style="margin-top:1rem"><label class="form-label">Nota (opcional)</label><input class="form-input" id="tradeNote" placeholder="Ej: Solo quiero permas, contactar por Discord"></div>
+    <button class="btn-primary" onclick="submitTrade()" style="margin-top:.5rem">Publicar Trade 🚀</button>`;
+  buildPickers();
+}
+
+function buildPickers(){
+  ['offerPicker','requestPicker'].forEach((pid,idx)=>{
+    const sel=idx===0?selOffers:selRequests;
+    document.getElementById(pid).innerHTML=ALL_FRUITS.map(f=>`
+      <div class="fruit-pick-item ${sel.includes(f.id)?'selected':''}" onclick="toggleFruit('${f.id}',${idx})">
+        <div class="sel-check">✓</div>
+        <img src="${f.img}" alt="${f.name}" onerror="this.style.opacity='.4'">
+        <div class="fname">${f.name}</div>
+      </div>`).join('');
+  });
+  updatePreviews();
+}
+
+function toggleFruit(id, idx){
+  const arr=idx===0?selOffers:selRequests;
+  const i=arr.indexOf(id);
+  if(i>=0){ arr.splice(i,1) }
+  else { if(arr.length>=4){ showToast('⚠️ Máximo 4 frutas'); return } arr.push(id) }
+  buildPickers();
+}
+
+function updatePreviews(){
+  ['offerPreview','requestPreview'].forEach((pid,idx)=>{
+    const arr=idx===0?selOffers:selRequests;
+    const el=document.getElementById(pid);
+    if(!el) return;
+    if(arr.length===0){ el.innerHTML=`<span style="font-size:.75rem;color:var(--text-muted);align-self:center;padding:4px">Ninguna</span>`; return }
+    el.innerHTML=arr.map(id=>{ const f=fruitById(id);
+      return f?`<img src="${f.img}" alt="${f.name}" title="${f.name} — clic para quitar" onclick="toggleFruit('${id}',${idx})">`:''; }).join('');
+  });
+}
+
+function submitTrade(){
+  const user=getSession();
+  if(!user){ showToast('❌ Debes iniciar sesión'); return }
+  if(selOffers.length===0){ showToast('⚠️ Añade al menos una fruta a ofrecer'); return }
+  if(selRequests.length===0){ showToast('⚠️ Añade al menos una fruta que pides'); return }
+  const note=document.getElementById('tradeNote').value.trim();
+  const trades=getTrades();
+  trades.unshift({
+    id:'t_'+Date.now(),
+    userId:user.id,
+    username:user.username,
+    roblox:user.roblox,
+    color:user.color||colorFor(user.username),
+    offers:[...selOffers],
+    requests:[...selRequests],
+    note,
+    ts:Date.now(),
+    w:user.w||0, f:user.f||0, l:user.l||0
+  });
+  saveTrades(trades);
+  closeModal('mainModal');
+  renderAll(); updateStats();
+  showToast('🚀 ¡Trade publicado!');
+}
+
+/* RENDER GRID */
+let activeFilter='all';
+function setFilter(btn,f){
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); activeFilter=f; renderAll();
+}
+
+function renderAll(){
+  const session=getSession();
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const sort=document.querySelector('.sort-select')?.value||'recent';
+  let trades=getTrades();
+  if(q) trades=trades.filter(t=>
+    t.username.toLowerCase().includes(q)||
+    t.roblox.toLowerCase().includes(q)||
+    [...t.offers,...t.requests].some(id=>{ const f=fruitById(id); return f&&f.name.toLowerCase().includes(q) })
+  );
+  if(activeFilter!=='all') trades=trades.filter(t=>
+    [...t.offers,...t.requests].some(id=>{ const f=fruitById(id); return f&&f.tier.toLowerCase()===activeFilter })
+  );
+  if(sort==='value') trades.sort((a,b)=>{
+    const va=a.offers.reduce((s,id)=>{ const f=fruitById(id); return s+(f?f.value:0) },0);
+    const vb=b.offers.reduce((s,id)=>{ const f=fruitById(id); return s+(f?f.value:0) },0);
+    return vb-va;
+  });
+  document.getElementById('tradeCount').textContent=trades.length;
+  const grid=document.getElementById('tradesGrid');
+  if(trades.length===0){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">🍈</div>
+      <h3>${getTrades().length===0?'Sé el primero en publicar un trade':'Sin resultados'}</h3>
+      <p>${getTrades().length===0?'Regístrate e inicia sesión para publicar tu trade.':'Prueba con otro nombre de fruta o jugador.'}</p>
+      ${session&&getTrades().length===0?'<button class="btn-post-trade" style="margin-top:1rem" onclick="openModal(\'post\')">+ Publicar mi Trade</button>':''}
+    </div>`; return;
+  }
+  grid.innerHTML=trades.map(t=>renderCard(t,session)).join('');
+}
+
+function renderCard(t, session){
+  const isOwn=session&&session.id===t.userId;
+  const col=t.color||colorFor(t.username);
+  const offersHTML=t.offers.map(id=>{ const f=fruitById(id);
+    return f?`<div class="fruit-icon"><img src="${f.img}" alt="${f.name}" onerror="this.style.opacity='.3'"><div class="tip">${f.name}</div></div>`:'' }).join('');
+  const reqs=t.requests.map(id=>{ const f=fruitById(id);
+    return f?`<div class="fruit-icon"><img src="${f.img}" alt="${f.name}" onerror="this.style.opacity='.3'"><div class="tip">${f.name}</div></div>`:'' }).join('');
+  const badge=isOwn?`<div class="own-badge">Mi Trade</div>`:'';
+  const deleteBtn=isOwn?`<button class="btn-delete" onclick="deleteTrade('${t.id}')">Eliminar</button>`:'';
+  const offerVal=t.offers.reduce((s,id)=>{ const f=fruitById(id); return s+(f?f.value:0) },0);
+  return `<div class="trade-card">
+    ${badge}
+    <div class="card-header">
+      <div class="player-avatar" style="background:${col}22;color:${col};border-color:${col}55">${t.username[0].toUpperCase()}</div>
+      <div class="player-info">
+        <div class="player-name">${t.username}</div>
+        <div class="player-meta"><span class="roblox-tag">🎮 ${t.roblox}</span>· ${timeAgo(t.ts)}</div>
+      </div>
+      <div class="online-dot"></div>
+    </div>
+    <div class="section-label">Ofrece</div>
+    <div class="fruits-row">${offersHTML||'<span style="font-size:.75rem;color:var(--text-muted)">—</span>'}</div>
+    <div class="section-label">Pide</div>
+    <div class="fruits-row">${reqs||'<span style="font-size:.75rem;color:var(--text-muted)">—</span>'}</div>
+    ${t.note?`<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem;padding:6px 8px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border)">${t.note}</div>`:''}
+    <hr class="divider">
+    <div class="ratings-row">
+      <span class="rating-badge badge-w">W ${t.w}</span>
+      <span class="rating-badge badge-f">F ${t.f}</span>
+      <span class="rating-badge badge-l">L ${t.l}</span>
+    </div>
+    <div class="card-actions">
+      ${deleteBtn||`<button class="btn-calc" onclick="showCalc('${t.id}')">Calcular</button>`}
+      <button class="btn-inspect" onclick="showInspect('${t.id}')">Inspeccionar</button>
+    </div>
+  </div>`;
+}
+
+function deleteTrade(id){
+  if(!confirm('¿Eliminar este trade?')) return;
+  const trades=getTrades().filter(t=>t.id!==id);
+  saveTrades(trades); renderAll(); updateStats();
+  showToast('🗑️ Trade eliminado');
+}
+
+/* INSPECT */
+function showInspect(id){
+  const t=getTrades().find(x=>x.id===id); if(!t) return;
+  const col=t.color||colorFor(t.username);
+  const offerFruits=t.offers.map(id=>fruitById(id)).filter(Boolean);
+  const reqFruits=t.requests.map(id=>fruitById(id)).filter(Boolean);
+  const offerVal=offerFruits.reduce((s,f)=>s+f.value,0);
+  const reqVal=reqFruits.reduce((s,f)=>s+f.value,0);
+  const diff=offerVal-reqVal;
+  const verdict=diff>500?`<span style="color:var(--win)">✅ Ofrece de más (+${diff.toLocaleString()}) — trade favorable</span>`
+    :diff<-500?`<span style="color:var(--loss)">⚠️ Pide de más (${diff.toLocaleString()}) — revisa bien</span>`
+    :`<span style="color:var(--fair)">⚖️ Trade equilibrado</span>`;
+  const offHTML=offerFruits.map(f=>`
+    <div class="inspect-fruit">
+      <img src="${f.img}" alt="${f.name}">
+      <div><div class="fruit-name">${f.name}</div><div class="fruit-tier tier-${f.tier.toLowerCase()}">Tier ${f.tier} · ${f.value.toLocaleString()} val</div></div>
+    </div>`).join('');
+  const reqHTML=reqFruits.map(f=>`
+    <div class="inspect-fruit">
+      <img src="${f.img}" alt="${f.name}">
+      <div><div class="fruit-name">${f.name}</div><div class="fruit-tier tier-${f.tier.toLowerCase()}">Tier ${f.tier} · ${f.value.toLocaleString()} val</div></div>
+    </div>`).join('');
+  document.getElementById('inspectContent').innerHTML=`
+    <div class="inspect-card-header">
+      <div class="inspect-avatar" style="background:${col}22;color:${col};font-family:'Orbitron',sans-serif;font-weight:800">${t.username[0].toUpperCase()}</div>
+      <div>
+        <div class="inspect-username">${t.username}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px">🎮 ${t.roblox} · publicado hace ${timeAgo(t.ts)}</div>
+        <div style="display:flex;gap:6px;margin-top:5px">
+          <span class="rating-badge badge-w" style="font-size:.68rem;padding:2px 8px">W ${t.w}</span>
+          <span class="rating-badge badge-f" style="font-size:.68rem;padding:2px 8px">F ${t.f}</span>
+          <span class="rating-badge badge-l" style="font-size:.68rem;padding:2px 8px">L ${t.l}</span>
+        </div>
+      </div>
+    </div>
+    ${t.note?`<div style="font-size:.8rem;color:var(--text-dim);padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;margin-bottom:1rem">💬 "${t.note}"</div>`:''}
+    <div style="margin-bottom:1rem"><div class="section-label">Ofrece (total: ${offerVal.toLocaleString()})</div><div class="inspect-fruits">${offHTML}</div></div>
+    <div style="margin-bottom:1rem"><div class="section-label">Pide (total: ${reqVal.toLocaleString()})</div><div class="inspect-fruits">${reqHTML}</div></div>
+    <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:1rem">
+      <div class="section-label" style="margin-bottom:4px">Análisis del Trade</div>
+      <div style="font-size:.82rem">${verdict}</div>
+    </div>
+    <button class="btn-primary" onclick="showToast('💬 Solicitud enviada a '+t.username);closeModal('inspectModal')">💬 Contactar a ${t.username}</button>`;
+  document.getElementById('inspectModal').classList.add('show');
+}
+
+function showCalc(id){
+  const t=getTrades().find(x=>x.id===id); if(!t) return;
+  const offerVal=t.offers.reduce((s,id)=>{ const f=fruitById(id); return s+(f?f.value:0) },0);
+  const reqVal=t.requests.reduce((s,id)=>{ const f=fruitById(id); return s+(f?f.value:0) },0);
+  const ratio=reqVal>0?(offerVal/reqVal*100).toFixed(0):100;
+  showToast(`📊 Offer: ${offerVal.toLocaleString()} · Pedido: ${reqVal.toLocaleString()} · Ratio: ${ratio}%`);
+}
+
+/* STATS */
+function updateStats(){
+  const trades=getTrades(), users=getUsers();
+  document.getElementById('statTrades').textContent=trades.length;
+  document.getElementById('statUsers').textContent=users.length;
+}
+
+/* TOAST */
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* INIT */
+updateNav(); renderAll(); updateStats();
+</script>
+</body>
+</html>
